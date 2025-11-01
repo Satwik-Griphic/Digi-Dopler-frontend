@@ -1,0 +1,26 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import './App.css'
+import Login from './pages/Login'
+import Admin from './pages/Admin'
+import DetectionDashboard from './pages/DetectionDashboard'
+import Dashboard from './pages/Dashboard'
+import Analytics from './pages/Analytics'
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/analytics" element={<Analytics />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/dashboard/detection" element={<DetectionDashboard />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+        
+      </Routes>
+    </BrowserRouter>
+  )
+}
+
+export default App
