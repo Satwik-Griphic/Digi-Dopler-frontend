@@ -22,20 +22,27 @@ export default function SensorsCard({className=""}) {
       </div>
 
       {/* Middle: Online / Offline counts */}
-      <div className="flex justify-around mb-3">
-        <span className="text-4xl font-semibold">{String(online).padStart(2, '0')}</span>
-        <span className="text-4xl font-semibold">{String(offline).padStart(2, '0')}</span>
-      </div>
-
-      {/* Bottom: Status badges */}
-      <div className="flex justify-between">
-        <div className="flex items-center gap-1 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
-          <Wifi className="w-4 h-4" />
-          Online
+      <div className="flex justify-start gap-10 mb-3">
+        {/* Online column */}
+        <div className="flex flex-col items-start">
+          <span className="text-4xl font-semibold">
+            {String(online).padStart(2, '0')}
+          </span>
+          <div className="flex items-center gap-1 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium mt-1">
+            <Wifi className="w-4 h-4" />
+            Online
+          </div>
         </div>
-        <div className="flex items-center gap-1 bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-medium">
-          <WifiOff className="w-4 h-4" />
-          Offline
+
+        {/* Offline column */}
+        <div className="flex flex-col items-start">
+          <span className="text-4xl font-semibold">
+            {String(offline).padStart(2, '0')}
+          </span>
+          <div className="flex items-center gap-1 bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-medium mt-1">
+            <WifiOff className="w-4 h-4" />
+            Offline
+          </div>
         </div>
       </div>
     </div>

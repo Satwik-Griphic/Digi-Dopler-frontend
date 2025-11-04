@@ -29,7 +29,7 @@ export default function AlertsCard({className=""}) {
 
   return (
     <div 
-    className={`bg-white shadow rounded-2xl p-4 h-full flex flex-col justify-between ${className || ""}`}
+    className={`bg-white shadow rounded-2xl p-4 h-full flex flex-col ${className || ""}`}
     >
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-gray-800 font-semibold text-lg">Alerts</h2>

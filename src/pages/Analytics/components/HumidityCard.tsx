@@ -12,7 +12,7 @@ export default function HumidityCard({className=""}) {
     >
     {/* Icon + Value Row */}
     <div className="flex items-center mb-1">
-      <Droplets className="w-8 h-8 text-green-500 m-2" />
+        <img src={"humidity.svg"} alt={"humidity"} className="w-10 h-10 object-contain" />
       <span className="text-5xl font-semibold">{humidity}</span>
       <span className="text-xl text-gray-500 ml-1">%</span>
     </div>
