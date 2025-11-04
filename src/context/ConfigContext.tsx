@@ -18,17 +18,17 @@ const DEFAULTS: AppConfig = {
   ui: { modelVersion: 'v2' },
   rooms: ['Lobby', 'Server Room', 'Office A'],
   otherBackend: {
-    apiBaseUrl: 'http://localhost:3000',
+    apiBaseUrl: 'http://3.110.42.224:3000',
     forwardFramePath: '/api/room-live/activity-logs/bulk?camera_id=1&room_id=1',
     analyticsPath: '/api/room-live/status',
     statusPath: '/status',
     pollMs: 5000,
   },
   analytics:{
-  pollMs: 120000,        
+  pollMs: 20000,        
   temperatureThreshold: 42,
   humidityThreshold: 80,
-  apiBaseUrl: "http://localhost:3000",
+  apiBaseUrl: "http://3.110.42.224:3000",
   endpoints:{
     currentTempHumid: "/api/sensor-dashboard/current-reading",        
     currentSensors: "/api/sensor-dashboard/sensor-list",

@@ -1,12 +1,12 @@
 import { useStreamAnalytics } from '../context/StreamAnalyticsContext'
 
-type IntruderEntry = {
-  id: string
-  image: string
-  name: string
-  location: string
-  timestamp: string
-}
+// type IntruderEntry = {
+//   id: string
+//   image: string
+//   name: string
+//   location: string
+//   timestamp: string
+// }
 
 export default function IntrudersList() {
   const { state } = useStreamAnalytics()
@@ -30,9 +30,9 @@ export default function IntrudersList() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-4">
+    <div className="bg-white rounded-lg shadow p-4 h-auto">
       <h2 className="font-semibold text-gray-900 mb-4">Recent Intruders</h2>
-      <div className="space-y-3">
+      <div className="space-y-3 h-auto overflow-y-auto">
         {intruders.map((intruder) => (
           <div
             key={intruder.id}
