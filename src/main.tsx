@@ -6,6 +6,7 @@ import App from './App.tsx'
 import { ConfigProvider, useConfig } from './context/ConfigContext'
 import { AuthProvider } from './context/AuthContext'
 import { StreamAnalyticsProvider } from './context/StreamAnalyticsContext'
+import { AnalyticsProvider } from './context/AnalyticsContext.tsx'
 
 function Bootstrap() {
   const { loading, error } = useConfig()
@@ -14,7 +15,9 @@ function Bootstrap() {
   return (
     <AuthProvider>
       <StreamAnalyticsProvider>
+        <AnalyticsProvider>
         <App />
+        </AnalyticsProvider>
       </StreamAnalyticsProvider>
     </AuthProvider>
   )

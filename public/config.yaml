@@ -1,9 +1,6 @@
 apiBaseUrl: "http://localhost:8000"
 sockets:
-  incomingUrl: "ws://172.26.119.12:8000/v1/ws/stream"
-  # Provide this to enable mirroring; leave commented to disable
-  # outgoingUrl: "ws://localhost:8000/v2/ws/mirror"
-  # WebSocket for other backend to fosrward AI events
+  incomingUrl: "ws://172.30.205.102:8000/v1/ws/stream"
   otherBackendUrl: "ws://localhost:8001/ws/forward"
 health:
   v1: "/v1/health"
@@ -20,9 +17,24 @@ rooms:
   - "Server Room"
   - "Office A"
 otherBackend:
-  apiBaseUrl: "http://localhost:8001"
-  analyticsPath: "/api/analytics/live"
+  apiBaseUrl: "http://localhost:3000"
+  forwardFramePath: "/api/room-live/activity-logs/bulk?camera_id=1&room_id=1"
+  analyticsPath: "/api/room-live/status?time=2"
   statusPath: "/api/status/verified"
-  pollMs: 2000
+  intruderHistoryPath: "/api/room-live/intruder-history"
+  pollMs: 10000
+
+analytics:
+  pollMs: 120000        
+  temperatureThreshold: 42
+  humidityThreshold: 80
+  apiBaseUrl: "http://localhost:3000"
+  aiBaseUrl: "http://172.26.119.12:8001"
+
+  endpoints:
+    currentTempHumid: "/api/sensor-dashboard/current-reading"        # returns current temp, humidity, sensors
+    currentSensors: "/api/sensor-dashboard/sensor-list"
+    previousTemp: "/api/sensor-dashboard/temperature-record"
+    previousHumidity: "/api/"
 
 

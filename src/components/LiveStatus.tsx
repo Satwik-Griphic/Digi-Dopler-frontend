@@ -10,7 +10,7 @@ export default function LiveStatus() {
   
   return (
     <div className="bg-white rounded-lg shadow p-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-1">
+      <div className="flex flex-row sm:flex-row sm:items-center sm:justify-between mb-1">
         <h2 className="font-semibold text-gray-900">Live status</h2>
         <p className="text-sm text-gray-500 mt-1 sm:mt-0">Detected in the last 5 mins</p>
       </div>

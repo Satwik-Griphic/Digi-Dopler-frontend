@@ -24,6 +24,20 @@ export type AppConfig = {
     analyticsPath: string
     statusPath: string
     pollMs?: number
+    forwardFramePath?: string 
+  }
+  analytics?:{
+    pollMs?: number
+    temperatureThreshold?: number
+    humidityThreshold?: number
+    apiBaseUrl?: string
+    endpoints?: {
+      currentTempHumid?: string
+      currentSensors?: string
+      previousTemp?: string
+      previousHumidity?: string
+      [k: string]: string | undefined
+    }
   }
 }
 

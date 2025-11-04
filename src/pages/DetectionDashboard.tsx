@@ -11,14 +11,14 @@ export default function DetectionDashboard() {
       <div className="p-0 w-full">
         <div className="flex flex-col w-full">
           {/* Responsive flex: 2/3 stream, 1/3 sidebar */}
-          <div className="flex flex-col lg:flex-row gap-6 w-full p-6">
+          <div className="flex lg:flex-row gap-6 w-full p-6">
             {/* Stream card with tabs and stream image */}
-            <div className="w-full lg:w-2/3 min-w-0">
+            <div className="lg:w-2/3 min-w-0">
               <VideoStream />
             </div>
             
             {/* Sidebar cards - Live Status and Intruders List */}
-            <div className="w-full lg:w-1/3 space-y-4">
+            <div className="lg:w-1/3 space-y-4">
               <LiveStatus />
               <IntrudersList />
             </div>

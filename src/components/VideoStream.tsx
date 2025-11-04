@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useStreamAnalytics } from '../context/StreamAnalyticsContext'
 import { useConfig } from '../context/ConfigContext'
 
@@ -10,6 +10,43 @@ export default function VideoStream() {
   const [activeCam, setActiveCam] = useState<'Cam 1' | 'Cam 2' | 'Cam 3' | 'Cam 4' | 'Cam 5'>('Cam 1')
   const [selectedRoom, setSelectedRoom] = useState('Server Room')
   const videoContainerRef = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    if (!state.currentFrame || !canvasRef.current) return
+
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const image = new Image()
+    image.onload = () => {
+      canvas.width = image.width
+      canvas.height = image.height
+      ctx.drawImage(image, 0, 0, image.width, image.height)
+
+      // draw bounding boxes if any
+      if (state.boundingBoxes?.length) {
+        state.boundingBoxes.forEach(box => {
+          const color = box.distance > box.threshold ? 'red' : 'lime'
+          ctx.strokeStyle = color
+          ctx.lineWidth = 1
+          ctx.strokeRect(box.x, box.y, box.w, box.h)
+
+          // name label
+          ctx.font = '16px Arial'
+          ctx.fillStyle = color
+
+          ctx.fillText( "",box.x + 4, box.y - 4)
+        })
+      }
+
+      // update aspect ratio
+      setAspect(image.width / image.height)
+      setHasFrame(true)
+    }
+    image.src = `data:image/jpeg;base64,${state.currentFrame}`
+  }, [state.currentFrame, state.boundingBoxes])
 
   function getRtspFor(cam: string): string | undefined {
     const sources = config?.sources || ({} as any)
@@ -87,6 +124,8 @@ export default function VideoStream() {
         className="relative bg-[#f8fafc] rounded-lg shadow-lg overflow-hidden flex flex-col w-full"
         style={styleAspect}
       >
+      <canvas ref={canvasRef} className="w-full h-full object-contain" />
+
         {/* Live badge - top left */}
         <div className="absolute z-10 left-4 top-4 flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
@@ -104,24 +143,12 @@ export default function VideoStream() {
           </svg>
         </button>
         
-        {/* Video/Image slot */}
-        <div className={
-          "flex-1 w-full h-full flex items-center justify-center " +
-          (state.connection !== 'connected' && !hasFrame ? 'bg-black' : '')
-        }>
-          {state.connection !== 'connected' && !hasFrame ? (
-            <div className="text-gray-400 w-full h-full flex items-center justify-center min-h-[120px]">
-              {state.connection === 'connecting' ? 'Connecting…' : 'Stream Disconnected'}
-            </div>
-          ) : (
-            <img
-              src={`data:image/jpeg;base64,${state.currentFrame || ''}`}
-              className="w-full h-full object-contain"
-              alt="Live stream"
-              onLoad={handleImgLoad}
-            />
-          )}
-        </div>
+        {/* Connection state fallback */}
+        {state.connection !== 'connected' && !hasFrame && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black text-gray-400">
+            {state.connection === 'connecting' ? 'Connecting…' : 'Stream Disconnected'}
+          </div>
+        )}
       </div>
     </div>
   )

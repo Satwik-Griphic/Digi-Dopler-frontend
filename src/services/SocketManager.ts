@@ -10,12 +10,12 @@ export type SocketCallbacks = {
 export class SocketManager {
   private url: string
   private mirrorUrl?: string
-  public ws: WebSocket | null = null
   private mirror: WebSocket | null = null
   private backoff = 500
   private readonly maxBackoff = 5000
   private stopped = false
   private callbacks: SocketCallbacks
+  public ws: WebSocket | null = null
 
   constructor(url: string, callbacks: SocketCallbacks, mirrorUrl?: string) {
     this.url = url
@@ -39,7 +39,7 @@ export class SocketManager {
     console.log('Connecting to socket:', this.url)
     this.ws = new WebSocket(this.url)
     if (this.mirrorUrl) this.mirror = new WebSocket(this.mirrorUrl)
-
+// forward the ai backend message to the other backend here
     this.ws.onopen = () => {
       this.backoff = 500
       this.callbacks.onOpen()

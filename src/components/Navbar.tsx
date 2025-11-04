@@ -6,6 +6,8 @@ export default function Navbar() {
   const isAnalytics = location.pathname === '/analytics'
   // Camera Feed should only be active for /dashboard/detection, not /dashboard
   const isCamera = location.pathname === '/dashboard/detection'
+  const isOccupancy = location.pathname === '/'
+
 
   return (
     <nav className="w-full bg-gray-100 ">
@@ -15,6 +17,8 @@ export default function Navbar() {
           <NavLink to="/dashboard" className={`px-3 py-1 rounded-full ${isDashboard ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Dashboard</NavLink>
           <NavLink to="/analytics" className={`px-3 py-1 rounded-full ${isAnalytics ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Analytics</NavLink>
           <NavLink to="/dashboard/detection" className={`px-3 py-1 rounded-full ${isCamera ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Camera Feed</NavLink>
+          <NavLink to="/" className={`px-3 py-1 rounded-full ${isOccupancy ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Occupancy</NavLink>
+
         </div>
         <div />
       </div>

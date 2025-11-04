@@ -4,7 +4,7 @@ import Login from './pages/Login'
 import Admin from './pages/Admin'
 import DetectionDashboard from './pages/DetectionDashboard'
 import Dashboard from './pages/Dashboard'
-import Analytics from './pages/Analytics'
+import Analytics from './pages/Analytics/Analytics'
 
 function App() {
   return (
