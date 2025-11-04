@@ -221,13 +221,14 @@ export function StreamAnalyticsProvider({ children }: { children: React.ReactNod
   
         // ---- Extract key metrics ----
         let total = Number(result.data["Total User"] ?? 0);
-        const intrudersArray = Array.isArray(result.data.Intruders)
-          ? result.data.Intruders
+        const intruders = result.data["Toal Intruders"]
+        const intrudersArray = Array.isArray(result.data.Intruder)
+          ? result.data.Intruder
           : [];
   
-        const unknown = intrudersArray.length;
-        if(unknown>total)
-          total=unknown
+        const unknown = intruders;
+        // if(unknown>total)
+        //   total=unknown
         const verified = Math.max(total - unknown, 0);
         const noFace = total - (verified + unknown);
   
