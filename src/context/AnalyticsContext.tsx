@@ -270,21 +270,26 @@ const initialState: MetricState = {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ timestamps }),
           });
-      
+          
           if (!aiRes.ok) throw new Error(`AI backend error: ${aiRes.status}`);
           const aiData = await aiRes.json();
           console.log("📦 AI predicted data (UTC):", aiData);
-      
+          
+          // Helper function to safely round numbers
+          const roundTo1 = (arr: number[] | undefined) =>
+            Array.isArray(arr) ? arr.map((v) => Number(v?.toFixed(1))) : [];
+          
           // Convert predicted timestamps (UTC) → IST for graph display
           const future = {
-            upperBound: aiData?.predicted_temperature_upper_bound ?? [],
-            lowerBound: aiData?.predicted_temperature_lower_bound ?? [],
-            predicted: aiData?.predicted_temperature ?? [],
+            upperBound: roundTo1(aiData?.predicted_temperature),
+            lowerBound: roundTo1(aiData?.predicted_temperature_lower_bound),
+            predicted: roundTo1(aiData?.predicted_temperature),
             timestamps: timestamps.map((utc) => {
               const d = new Date(utc.replace(" ", "T") + "Z");
               return new Date(d.getTime() + 5.5 * 60 * 60 * 1000).toISOString();
             }),
           };
+          
       
           // --- 4️⃣ Dispatch updates ---
           dispatch({
