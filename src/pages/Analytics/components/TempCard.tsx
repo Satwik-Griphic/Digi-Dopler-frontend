@@ -14,7 +14,7 @@ export default function TempCard({className=""}) {
 
       {/* Temperature Value */}
       <div className="flex items-baseline">
-      <Thermometer className="w-6 h-6 text-blue-500 m-2" />
+        <img src={"temp-thermometer.svg"} alt={"thermometer"} className="w-10 h-10 object-contain" />
         <span className="text-5xl font-semibold">{temperature}</span>
         <span className="text-xl text-gray-500 ml-1">°C</span>
       </div>
