@@ -12,7 +12,7 @@ export default function Analytics() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div className="grid grid-cols-5 gap-5 p-5">
+      <div className="grid grid-cols-6 gap-6 p-6">
         <div className="col-span-1 flex flex-col gap-4">
           <div className="flex-1">
             <TempCard className="h-full" />
@@ -25,7 +25,7 @@ export default function Analytics() {
           </div>
         </div>
 
-        <div className="col-span-3 flex flex-col gap-5">
+        <div className="col-span-3 flex flex-col gap-6">
           <div className="flex-1">
             <CurrentTempGraph className="h-full" />
           </div>
@@ -34,7 +34,7 @@ export default function Analytics() {
           </div>
         </div>
 
-        <div className="col-span-1 flex flex-col gap-5">
+        <div className="col-span-2 flex flex-col gap-6">
           <div className="flex-[2]">
             <AlertsCard className="h-full" />
           </div>

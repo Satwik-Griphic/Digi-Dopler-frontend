@@ -11,7 +11,7 @@ export default function SensorsCard({className=""}) {
 
   return (
     <div 
-    className={`bg-white shadow rounded-2xl p-4 h-full flex flex-col justify-between ${className || ""}`}
+    className={`bg-white shadow rounded-2xl p-4 h-full flex flex-col align-start justify-center ${className || ""}`}
     >
       {/* Top: Icon + Title */}
       <div className="flex items-center mb-3">

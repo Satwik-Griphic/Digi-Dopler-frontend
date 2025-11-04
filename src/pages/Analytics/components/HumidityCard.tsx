@@ -8,7 +8,7 @@ export default function HumidityCard({className=""}) {
 
   return (
     <div 
-    className={`bg-white shadow rounded-2xl p-4 h-full flex flex-col justify-between ${className || ""}`}
+    className={`bg-white shadow rounded-2xl p-4 h-full flex flex-col  items-start justify-center ${className || ""}`}
     >
     {/* Icon + Value Row */}
     <div className="flex items-center mb-1">
