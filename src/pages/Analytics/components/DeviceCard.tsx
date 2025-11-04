@@ -20,7 +20,7 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center justify-between p-5 bg-white rounded-2xl shadow-sm w-64 border border-gray-100 transition-all hover:shadow-md">
+    <div className="flex flex-col items-center justify-between bg-white transition-all h-auto w-auto">
       {/* Header */}
       <div className="flex justify-between items-center w-full mb-3">
         <span className={`text-sm font-medium ${isOn ? "text-gray-800" : "text-gray-500"}`}>

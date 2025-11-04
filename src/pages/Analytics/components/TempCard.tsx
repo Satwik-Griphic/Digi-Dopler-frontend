@@ -1,13 +1,15 @@
 import { Thermometer } from 'lucide-react'
 import { useAnalytics } from '../../../context/AnalyticsContext'
 
-export default function TempCard() {
+export default function TempCard({className=""}) {
   const { state } = useAnalytics()
   const temperature = state.temperature?.toFixed?.(1) ?? '--'
   const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col items-start justify-center text-gray-900 w-56 h-48">
+    <div 
+    className={`bg-white shadow rounded-2xl p-4 h-full flex flex-col justify-between ${className || ""}`}
+    >
       {/* Icon */}
 
       {/* Temperature Value */}

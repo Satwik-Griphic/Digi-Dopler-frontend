@@ -2,7 +2,7 @@ import React from 'react'
 import { Wifi, WifiOff, Rss } from 'lucide-react'
 import { useAnalytics } from '../../../context/AnalyticsContext'
 
-export default function SensorsCard() {
+export default function SensorsCard({className=""}) {
   const { state } = useAnalytics()
   const { sensors } = state
   const total = sensors?.total ?? 0
@@ -10,7 +10,9 @@ export default function SensorsCard() {
   const offline = sensors?.offline ?? 0
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col justify-center text-gray-900 w-56 h-48">
+    <div 
+    className={`bg-white shadow rounded-2xl p-4 h-full flex flex-col justify-between ${className || ""}`}
+    >
       {/* Top: Icon + Title */}
       <div className="flex items-center mb-3">
         <Rss className="w-5 h-5 text-blue-500 mr-2" />

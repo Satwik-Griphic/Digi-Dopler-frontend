@@ -11,7 +11,7 @@ import {
 } from 'recharts'
 import { useAnalytics } from '../../../context/AnalyticsContext'
 
-export default function CurrentTempGraph() {
+export default function CurrentTempGraph({className=""}) {
   const { state } = useAnalytics()
   const { tempHistory, tempFuture } = state
   const threshold = 32
@@ -85,7 +85,9 @@ export default function CurrentTempGraph() {
   )
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+    <div 
+    className={`bg-white shadow rounded-2xl p-4 h-full flex flex-col justify-between ${className || ""}`}
+    >
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-sm font-medium text-gray-800">23°C Current Temperature</h2>
         <div className="flex gap-2">
