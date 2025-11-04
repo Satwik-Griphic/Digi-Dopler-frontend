@@ -36,9 +36,9 @@ const initialState: MetricState = {
     humidity: 0,
     sensors: { total: 0, online: 0, offline: 0 },
     tempHistory: [],
-    tempFuture: { upperBound: [], lowerBound: [] },
+    tempFuture: { upperBound: [], lowerBound: [], predicted: [], timestamps: []},
     humidityHistory: [],
-    humidityFuture: { upperBound: [], lowerBound: [] },
+    humidityFuture: { upperBound: [], lowerBound: [], predicted: [], timestamps: []},
     alerts: [],
   }
   
@@ -144,7 +144,7 @@ const initialState: MetricState = {
           console.log("temp and humidity fetched:", temperature, " ---", humidity)
       
     
-          dispatch({ type: 'updateMetrics', payload: { temperature, humidity } })
+          dispatch({ type: 'updateMetrics', payload: { temperature, humidity  } })
           const metrics = { temperature, humidity, sensors: state.sensors }
           const alerts = buildAlerts(metrics, config)
           dispatch({ type: 'updateAlerts', payload: alerts })
@@ -169,7 +169,7 @@ const initialState: MetricState = {
     
         const sensorsList = result.data
         const total = sensorsList.length
-        const online = sensorsList.filter(s => s.isActive).length
+        const online = sensorsList.filter((s: any) => s.isActive).length
         const offline = total - online
         
         const sensors = { total, online, offline }

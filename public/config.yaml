@@ -17,7 +17,7 @@ rooms:
   - "Server Room"
   - "Office A"
 otherBackend:
-  apiBaseUrl: "http://localhost:3000"
+  apiBaseUrl: "http://3.110.42.224:3000"
   forwardFramePath: "/api/room-live/activity-logs/bulk?camera_id=1&room_id=1"
   analyticsPath: "/api/room-live/status?time=2"
   statusPath: "/api/status/verified"
@@ -25,10 +25,10 @@ otherBackend:
   pollMs: 10000
 
 analytics:
-  pollMs: 120000        
+  pollMs: 20000        
   temperatureThreshold: 42
   humidityThreshold: 80
-  apiBaseUrl: "http://localhost:3000"
+  apiBaseUrl: "http://3.110.42.224:3000"
   aiBaseUrl: "http://172.26.119.12:8001"
 
   endpoints:

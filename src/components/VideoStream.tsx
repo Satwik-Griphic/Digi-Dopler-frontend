@@ -61,13 +61,13 @@ export default function VideoStream() {
     return typeof value === 'string' ? value : undefined
   }
 
-  function handleImgLoad(e: React.SyntheticEvent<HTMLImageElement>) {
-    const { naturalWidth, naturalHeight } = e.currentTarget
-    if (naturalWidth && naturalHeight) {
-      setAspect(naturalWidth / naturalHeight)
-      setHasFrame(true)
-    }
-  }
+  // function handleImgLoad(e: React.SyntheticEvent<HTMLImageElement>) {
+  //   const { naturalWidth, naturalHeight } = e.currentTarget
+  //   if (naturalWidth && naturalHeight) {
+  //     setAspect(naturalWidth / naturalHeight)
+  //     setHasFrame(true)
+  //   }
+  // }
 
   function toggleFullscreen() {
     if (!videoContainerRef.current) return
