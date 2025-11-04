@@ -1,7 +1,7 @@
 import { useAnalytics } from '../../../context/AnalyticsContext'
 import { AlertTriangle, AlertCircle, WifiOff } from 'lucide-react'
 
-export default function AlertsCard() {
+export default function AlertsCard({className=""}) {
   const { state } = useAnalytics()
   const alerts = state.alerts || []
 
@@ -28,7 +28,9 @@ export default function AlertsCard() {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow p-4 h-3/4">
+    <div 
+    className={`bg-white shadow rounded-2xl p-4 h-full flex flex-col justify-between ${className || ""}`}
+    >
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-gray-800 font-semibold text-lg">Alerts</h2>
         <button className="text-sm text-gray-500 hover:text-gray-700">View all</button>

@@ -12,29 +12,40 @@ export default function Analytics() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div className="grid grid-cols-4 gap-4 p-4">
-      {/* Left column */}
-      <div className="col-span-1 space-y-4 flex flex-col items-end">
-        <TempCard />
-        <HumidityCard />
-        <SensorsCard />
-      </div>
-
-      {/* Middle column */}
-      <div className="col-span-2 space-y-4">
-        <CurrentTempGraph />
-        <CurrentHumidityGraph />
-      </div>
-
-      {/* Right column */}
-      <div className="col-span-1">
-        <AlertsCard />
-        <div className="flex gap-6 mt-4">
-          <BackupAC />
-          <BackupHumidifier />
+      <div className="grid grid-cols-5 gap-5 p-5">
+        <div className="col-span-1 flex flex-col gap-4">
+          <div className="flex-1">
+            <TempCard className="h-full" />
+          </div>
+          <div className="flex-1">
+            <HumidityCard className="h-full" />
+          </div>
+          <div className="flex-1">
+            <SensorsCard className="h-full" />
+          </div>
         </div>
+
+        <div className="col-span-3 flex flex-col gap-5">
+          <div className="flex-1">
+            <CurrentTempGraph className="h-full" />
+          </div>
+          <div className="flex-1">
+            <CurrentHumidityGraph className="h-full" />
+          </div>
+        </div>
+
+        <div className="col-span-1 flex flex-col gap-5">
+          <div className="flex-[2]">
+            <AlertsCard className="h-full" />
+          </div>
+
+          <div className="flex-[1] flex gap-4">
+            <BackupAC className="h-full w-1/2" />
+            <BackupHumidifier className="h-full w-1/2" />
+          </div>
+        </div>
+
       </div>
-    </div>
     </div>
   )
 }
