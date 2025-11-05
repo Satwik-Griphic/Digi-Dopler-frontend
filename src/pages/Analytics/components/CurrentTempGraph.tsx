@@ -23,7 +23,7 @@ export default function CurrentTempGraph({ className = "" }) {
   const { tempHistory, tempFuture } = state
   const temperature = state.temperature?.toFixed?.(1) ?? '--'
 
-  console.log("tempFuture,tempHistory", tempFuture, tempHistory)
+  // console.log("tempFuture,tempHistory", tempFuture, tempHistory)
   const threshold = 32
 
   const [zoomArea, setZoomArea] = useState<{ x1: number | null; x2: number | null }>({
@@ -83,10 +83,10 @@ export default function CurrentTempGraph({ className = "" }) {
       type: "future",
     })),
   ];
-  console.log("full Data:", fullData)
+  // console.log("full Data:", fullData)
 
   const dataToRender = isZoomed ? filteredData : fullData
-  console.log("data to render:", dataToRender)
+  // console.log("data to render:", dataToRender)
 
   // ----- Helpers -----
   const formatXAxisLocal = (ts: number) => {
@@ -235,6 +235,8 @@ export default function CurrentTempGraph({ className = "" }) {
       </span>
     </div>
   )
+  
+  
 
   // ----- Render -----
   return (
@@ -244,11 +246,12 @@ export default function CurrentTempGraph({ className = "" }) {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-sm font-medium text-gray-800">{`${temperature}°C  Temperature`}</h2>
         <div className="flex gap-2">
-          <div className="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-500 text-xs font-bold">
+          {/* <div className="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-500 text-xs font-bold">
             !
-          </div>
+          </div> */}
           <div className="w-6 h-6 bg-orange-100 rounded flex items-center justify-center text-orange-500 text-xs font-bold">
-            !
+          <img src={"/orange-warning.svg"} alt={"logo"} className="w-4 h-auto object-contain" />
+
           </div>
           {isZoomed && (
             <button
@@ -268,16 +271,12 @@ export default function CurrentTempGraph({ className = "" }) {
     onMouseDown={handleMouseDown}
     onMouseMove={handleMouseMove}
     onMouseUp={handleMouseUp}
-    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+    margin={{ top: 10, right: 20, left: 20, bottom: 0 }}
   >
     <defs>
       <linearGradient id="blueFill" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stopColor="#60a5fa" stopOpacity={0.4} />
         <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.05} />
-      </linearGradient>
-      <linearGradient id="redFill" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#f87171" stopOpacity={0.5} />
-        <stop offset="100%" stopColor="#f87171" stopOpacity={0.05} />
       </linearGradient>
       <linearGradient id="orangeFill" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stopColor="#fbbf24" stopOpacity={0.4} />
@@ -291,15 +290,22 @@ export default function CurrentTempGraph({ className = "" }) {
       dataKey="time"
       type="number"
       scale="time"
-      domain={xDomain}
+      domain={[
+        startTime - 5 * 60 * 1000, // small left margin (5 min)
+        endTime + 5 * 60 * 1000,   // small right margin (5 min)
+      ]}
       tickFormatter={(v) => formatXAxisLocal(v)}
-      tick={{ fontSize: 9 }}
+      tick={{ fontSize: 9, dy:15 }}
       ticks={ticks}
+      axisLine={false}
     />
     <YAxis
-      tick={{ fontSize: 10 }}
-      domain={yDomain}
-      axisLine={{ strokeOpacity: 0.3 }}
+      tick={{ fontSize: 10, dx: -30 }}
+      domain={[
+        Math.floor(yDomain[0]),
+        Math.ceil(yDomain[1]),
+      ]}
+      axisLine={false}
       tickLine={{ strokeOpacity: 0.3 }}
     />
 
@@ -309,27 +315,17 @@ export default function CurrentTempGraph({ className = "" }) {
     <ReferenceLine y={23} stroke="#9ca3af" strokeDasharray="5 5" />
     <ReferenceLine y={18} stroke="#9ca3af" strokeDasharray="5 5" />
 
-    {/* Red Area for History above threshold */}
-    <Area
-      type="monotone"
-      dataKey="current"
-      data={dataToRender.filter(
-        (d) => d.type === "history" && d.current > 23
-      )}
-      stroke="none"
-      fill="url(#redFill)"
-      isAnimationActive={false}
-    />
-
     {/* Orange Area for Future above threshold */}
     <Area
       type="monotone"
-      dataKey="upperBound"
       data={dataToRender.filter(
         (d) => d.type === "future" && d.upperBound > 23
       )}
+      dataKey="upperBound"
       stroke="none"
-      fill="url(#orangeFill)"
+      fill="#FFA05B"
+      fillOpacity={0.4}
+      baseValue={23} // fill starts from threshold, not base
       isAnimationActive={false}
     />
 
@@ -349,7 +345,7 @@ export default function CurrentTempGraph({ className = "" }) {
       dataKey="upperBound"
       stroke="#000"
       dot={false}
-      strokeWidth={1.2}
+      strokeWidth={1}
       connectNulls
     />
     <Line
@@ -357,7 +353,7 @@ export default function CurrentTempGraph({ className = "" }) {
       dataKey="lowerBound"
       stroke="#ec4899"
       dot={false}
-      strokeWidth={1.2}
+      strokeWidth={1}
       connectNulls
     />
 
@@ -387,6 +383,7 @@ export default function CurrentTempGraph({ className = "" }) {
     )}
   </AreaChart>
 </ResponsiveContainer>
+
 
       {renderLegend()}
     </div>

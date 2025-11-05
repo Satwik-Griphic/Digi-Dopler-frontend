@@ -13,6 +13,7 @@ export default function VideoStream() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
+    console.log(state.currentFrame)
     if (!state.currentFrame || !canvasRef.current) return
 
     const canvas = canvasRef.current
@@ -46,6 +47,7 @@ export default function VideoStream() {
       setHasFrame(true)
     }
     image.src = `data:image/jpeg;base64,${state.currentFrame}`
+    // console.log(image.src)
   }, [state.currentFrame, state.boundingBoxes])
 
   function getRtspFor(cam: string): string | undefined {
@@ -69,6 +71,7 @@ export default function VideoStream() {
   //   }
   // }
 
+  console.log("videoContainerRef",canvasRef)
   function toggleFullscreen() {
     if (!videoContainerRef.current) return
     

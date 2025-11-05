@@ -3,14 +3,21 @@ import { AlertTriangle, AlertCircle, WifiOff } from 'lucide-react'
 
 export default function AlertsCard({className=""}) {
   const { state } = useAnalytics()
-  const alerts = state.alerts || []
+  // console.log("alerts",alerts)
+  let alerts = [{
+    "id": "orangeAlert-1762317657694",
+    "type": "orangeAlert",
+    "message": "Temperature will cross 32°C in 10 min",
+    "color": "orange",
+    "timestamp": "07:03 AM"
+}]
 
   const getAlertStyle = (color: string) => {
     switch (color) {
       case 'red':
         return 'bg-red-50 border-red-100 text-red-700'
-      case 'yellow':
-        return 'bg-yellow-50 border-yellow-100 text-yellow-700'
+      case 'orange':
+        return 'bg-orange-50 border-orange-100 text-orange-700'
       default:
         return 'bg-blue-50 border-blue-100 text-blue-700'
     }
@@ -18,7 +25,7 @@ export default function AlertsCard({className=""}) {
 
   const getAlertIcon = (color: string) => {
     switch (color) {
-      case 'red':
+      case 'orange':
         return <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
       case 'yellow':
         return <AlertTriangle className="w-4 h-4 text-yellow-500 flex-shrink-0" />
@@ -46,7 +53,7 @@ export default function AlertsCard({className=""}) {
               className={`flex items-center justify-between px-3 py-2 rounded-md border ${getAlertStyle(alert.color)}`}
             >
               <div className="flex items-center gap-2">
-                {getAlertIcon(alert.color)}
+              <img src={"/orange-warning.svg"} alt={"logo"} className="w-8 h-auto object-contain" />
                 <span className="text-sm font-medium">{alert.message}</span>
               </div>
               <span className="text-xs text-gray-400 font-medium whitespace-nowrap">

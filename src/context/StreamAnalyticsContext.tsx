@@ -137,7 +137,7 @@ export function StreamAnalyticsProvider({ children }: { children: React.ReactNod
         onClose: () => dispatch({ type: 'connection', status: 'disconnected' }),
         onError: () => dispatch({ type: 'connection', status: 'disconnected' }),
         onMessage: (msg: SocketMessage) => {
-          // console.log(msg)
+          console.log("msg",msg)
           switch (msg.type) {
             case 'response':
               // console.log('response received from ai backend', msg)
@@ -335,5 +335,4 @@ function transformAiResponse(msg) {
     coordinates: coords,
   };
 }
-
 

@@ -56,6 +56,7 @@ const initialState: MetricState = {
         }
   
       case 'updateHumidityGraph':
+        console.log(action.payload)
         return {
           ...state,
           humidityHistory: action.payload.humidityHistory,
@@ -141,7 +142,7 @@ const initialState: MetricState = {
           const temperature = Number(tempObj?.data?.celsius ?? tempObj?.value ?? 0)
           const humidity = Number(humidObj?.data?.relativePercentage ?? humidObj?.value ?? 0)
 
-          console.log("temp and humidity fetched:", temperature, " ---", humidity)
+        //   console.log("temp and humidity fetched:", temperature, " ---", humidity)
       
     
           dispatch({ type: 'updateMetrics', payload: { temperature, humidity  } })
@@ -194,6 +195,9 @@ const initialState: MetricState = {
           const dbEndpoint =
             config.analytics.endpoints?.previousTemp ||
             "/api/sensor-dashboard/temperature-record";
+          const dbHumidEndpoint =
+            config.analytics.endpoints?.previousHumidity ||
+            "/api/sensor-dashboard/humidity-record";
           const aiEndpoint = "/v1/predict/";
       
           // --- 1️⃣ Build UTC time ranges ---
@@ -221,7 +225,7 @@ const initialState: MetricState = {
       
           if (!dbRes.ok) throw new Error(`DB backend error: ${dbRes.status}`);
           const dbData = await dbRes.json();
-          console.log("Actual DB data (past 12h UTC):", dbData);
+        //   console.log("Actual DB data (past 12h UTC):", dbData);
 
       
           // Convert UTC → IST for display
@@ -239,10 +243,31 @@ const initialState: MetricState = {
                     : null,
               }))
             : [];
-          console.log("📦 DB data (past 12h UTC):", history);
+        //   console.log("📦 DB data (past 12h UTC):", history);
+
+          // --- 3️⃣ DB backend call (Humidity History) ---
+            const humidUrl = `${dbBaseUrl}${dbHumidEndpoint}?from_date=${encodeURIComponent(from)}&to_date=${encodeURIComponent(to)}`;
+            const humidRes = await fetch(humidUrl, {
+            method: "GET",
+            headers: { Accept: "application/json" },
+            cache: "no-store",
+            });
+            if (!humidRes.ok)
+            throw new Error(`Humidity DB backend error: ${humidRes.status}`);
+            const humidData = await humidRes.json();
+
+            const humidityHistory = Array.isArray(humidData?.data?.actual)
+            ? humidData.data.actual.map((d: any) => ({
+                datetime: toIST(d.createdAt).toISOString(),
+                humidity:
+                    d.humidity !== undefined && d.humidity !== null
+                    ? Number(d.humidity)
+                    : null,
+                }))
+            : [];
 
       
-          // --- 3️⃣ AI backend call (predicted future, UTC timestamps) ---
+          // --- 4️⃣ AI backend call (predicted future, UTC timestamps) ---
           const timestamps: string[] = [];
           const start = new Date(now.getTime() + 2 * 60 * 1000); // current time + 2min
       
@@ -263,7 +288,7 @@ const initialState: MetricState = {
             timestamps.push(formatted);
           }
       
-          console.log("🕒 Payload timestamps (to AI backend, UTC):", timestamps);
+        //   console.log("🕒 Payload timestamps (to AI backend, UTC):", timestamps);
       
           const aiRes = await fetch(`${aiBaseUrl}${aiEndpoint}`, {
             method: "POST",
@@ -273,7 +298,7 @@ const initialState: MetricState = {
           
           if (!aiRes.ok) throw new Error(`AI backend error: ${aiRes.status}`);
           const aiData = await aiRes.json();
-          console.log("📦 AI predicted data (UTC):", aiData);
+        //   console.log("📦 AI predicted data (UTC):", aiData);
           
           //morphing the data for smoothness
           // Helper function to safely round numbers
@@ -284,12 +309,16 @@ const initialState: MetricState = {
             let predicted = roundTo1(aiData?.predicted_temperature);
             let upperBound = roundTo1(aiData?.predicted_temperature_upper_bound);
             let lowerBound = roundTo1(aiData?.predicted_temperature_lower_bound);
+            // predicted_humidity_upper_bound
+            let humidiyUpperBound = roundTo1(aiData?.predicted_temperature_upper_bound);
+            let humidiyLowerBound = roundTo1(aiData?.predicted_temperature_lower_bound);
             
             // ---- 🧩 NEW: Smooth transition for first 5 points ----
             
             // 1️⃣ Get last temperature from history
             const lastTemp =
                 history.length > 0 ? history[history.length - 1].temperature : 0;
+            const lastHumidity=humidityHistory> 0 ? humidityHistory[humidityHistory.length - 1].temperature : 0;
             
             // 2️⃣ Helper to fill initial 5 points smoothly
             const fillInitialTransition = (data: number[], startVal: number) => {
@@ -309,19 +338,34 @@ const initialState: MetricState = {
             predicted = fillInitialTransition(predicted, lastTemp);
             upperBound = fillInitialTransition(upperBound, lastTemp);
             lowerBound = fillInitialTransition(lowerBound, lastTemp);
+            humidiyUpperBound= fillInitialTransition(humidiyUpperBound, lastHumidity);
+            humidiyLowerBound= fillInitialTransition(humidiyLowerBound, lastHumidity);
+
             
             // ---- ✅ Rebuild the future object ----
-            const future = {
+            const futureT = {
                 upperBound,
                 lowerBound,
                 predicted,
+                
+                timestamps: timestamps.map((utc) => {
+                const d = new Date(utc.replace(" ", "T") + "Z");
+                return new Date(d.getTime() + 5.5 * 60 * 60 * 1000).toISOString();
+                }),
+            };
+            const futureH = {
+                
+                humidiyLowerBound,
+                humidiyUpperBound,
                 timestamps: timestamps.map((utc) => {
                 const d = new Date(utc.replace(" ", "T") + "Z");
                 return new Date(d.getTime() + 5.5 * 60 * 60 * 1000).toISOString();
                 }),
             };
             
-            console.log("✅ Modified future data (with smooth transition):", future);
+            // console.log("✅ Modified future data (with smooth transition):", futureT);
+            // console.log("✅ Modified future Humidity data (with smooth transition):", futureH);
+
   
 
 
@@ -331,12 +375,20 @@ const initialState: MetricState = {
           // --- 4️⃣ Dispatch updates ---
           dispatch({
             type: "updateTempGraph",
-            payload: { tempHistory: history, tempFuture: future },
+            payload: { tempHistory: history, tempFuture: futureT },
           });
+          dispatch({
+          type: "updateHumidityGraph",
+          payload: { humidityHistory: humidityHistory, humidityFuture: futureH },
+        });
       
           console.log("✅ Temperature graph updated:", {
             historyCount: history,
-            futurePoints: future,
+            futurePoints: futureT,
+          });
+          console.log("✅ Humidity graph updated:", {
+            historyCount: humidityHistory,
+            futurePoints: futureH,
           });
         } catch (err) {
           console.error("❌ Failed to fetch temperature graph data:", err);

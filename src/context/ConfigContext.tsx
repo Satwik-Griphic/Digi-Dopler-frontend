@@ -12,11 +12,11 @@ const ConfigContext = createContext<ConfigState | undefined>(undefined)
 
 const DEFAULTS: AppConfig = {
   apiBaseUrl: 'http://172.26.119.12:8000',
-  sockets: { incomingUrl: 'ws://172.26.119.12:8000/v2/ws/streamsc' },
+  sockets: { incomingUrl: 'ws://172.26.119.12:8000/v2/ws/stream' },
   health: { v1: '/v1/health', v2: '/v2/health' },
   sources: { defaultRtsp: '', cam1: null, cam2: null },
   ui: { modelVersion: 'v2' },
-  rooms: ['Lobby', 'Server Room', 'Office A'],
+  rooms: ['Security Room', 'Lobby', 'Office A'],
   otherBackend: {
     apiBaseUrl: 'http://3.110.42.224:3000',
     forwardFramePath: '/api/room-live/activity-logs/bulk?camera_id=1&room_id=1',
@@ -34,7 +34,7 @@ const DEFAULTS: AppConfig = {
     currentSensors: "/api/sensor-dashboard/sensor-list",
     aiBaseUrl: "http://172.26.119.12:8001",
     previousTemp: "/api/sensor-dashboard/temperature-record",
-    previousHumidity: "/api/"
+    previousHumidity: "/api/sensor-dashboard/humidity-record"
   }
   }
 }
