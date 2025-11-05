@@ -12,8 +12,8 @@ export default function Navbar() {
   return (
     <nav className="w-full bg-gray-100 ">
       <div className="px-4 h-14 flex items-center justify-between w-full">
-        <div className="font-semibold text-lg">Intruder Detection System</div>
-        <div className="flex items-center gap-4 bg-white rounded-full px-2 py-2">
+      <img src={"/skets-logo.svg"} alt={"logo"} className="w-24 h-auto object-contain" />
+      <div className="flex items-center gap-4 bg-white rounded-full px-2 py-2 my-2">
           <NavLink to="/dashboard" className={`px-3 py-1 rounded-full ${isDashboard ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Dashboard</NavLink>
           <NavLink to="/analytics" className={`px-3 py-1 rounded-full ${isAnalytics ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Analytics</NavLink>
           <NavLink to="/dashboard/detection" className={`px-3 py-1 rounded-full ${isCamera ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Camera Feed</NavLink>

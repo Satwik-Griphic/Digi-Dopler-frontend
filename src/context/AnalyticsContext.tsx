@@ -275,22 +275,59 @@ const initialState: MetricState = {
           const aiData = await aiRes.json();
           console.log("📦 AI predicted data (UTC):", aiData);
           
+          //morphing the data for smoothness
           // Helper function to safely round numbers
-          const roundTo1 = (arr: number[] | undefined) =>
-            Array.isArray(arr) ? arr.map((v) => Number(v?.toFixed(1))) : [];
+            const roundTo1 = (arr: number[] | undefined) =>
+                Array.isArray(arr) ? arr.map((v) => Number(v?.toFixed(1))) : [];
+            
+            // Convert predicted timestamps (UTC) → IST for graph display
+            let predicted = roundTo1(aiData?.predicted_temperature);
+            let upperBound = roundTo1(aiData?.predicted_temperature_upper_bound);
+            let lowerBound = roundTo1(aiData?.predicted_temperature_lower_bound);
+            
+            // ---- 🧩 NEW: Smooth transition for first 5 points ----
+            
+            // 1️⃣ Get last temperature from history
+            const lastTemp =
+                history.length > 0 ? history[history.length - 1].temperature : 0;
+            
+            // 2️⃣ Helper to fill initial 5 points smoothly
+            const fillInitialTransition = (data: number[], startVal: number) => {
+                if (!Array.isArray(data) || data.length < 5) return data;
+                const target = data[4]; // 5th predicted point
+                const filled = [...data];
+                for (let i = 0; i < 5; i++) {
+                // random value between startVal and target
+                const rand = startVal + Math.random() * (target - startVal);
+                filled[i] = Number(rand.toFixed(1));
+                }
+                filled[0] = startVal; // ensure first matches last history
+                return filled;
+            };
+            
+            // 3️⃣ Apply to all three arrays
+            predicted = fillInitialTransition(predicted, lastTemp);
+            upperBound = fillInitialTransition(upperBound, lastTemp);
+            lowerBound = fillInitialTransition(lowerBound, lastTemp);
+            
+            // ---- ✅ Rebuild the future object ----
+            const future = {
+                upperBound,
+                lowerBound,
+                predicted,
+                timestamps: timestamps.map((utc) => {
+                const d = new Date(utc.replace(" ", "T") + "Z");
+                return new Date(d.getTime() + 5.5 * 60 * 60 * 1000).toISOString();
+                }),
+            };
+            
+            console.log("✅ Modified future data (with smooth transition):", future);
+  
+
+
           
-          // Convert predicted timestamps (UTC) → IST for graph display
-          const future = {
-            upperBound: roundTo1(aiData?.predicted_temperature),
-            lowerBound: roundTo1(aiData?.predicted_temperature_lower_bound),
-            predicted: roundTo1(aiData?.predicted_temperature),
-            timestamps: timestamps.map((utc) => {
-              const d = new Date(utc.replace(" ", "T") + "Z");
-              return new Date(d.getTime() + 5.5 * 60 * 60 * 1000).toISOString();
-            }),
-          };
-          
-      
+    //   "2025-11-04T16:04:15.566Z"  || future: "2025-11-05T02:07:18.000Z"
+
           // --- 4️⃣ Dispatch updates ---
           dispatch({
             type: "updateTempGraph",

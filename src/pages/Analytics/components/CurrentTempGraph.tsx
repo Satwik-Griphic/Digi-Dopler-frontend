@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import currentPoint from "/public/currentPoint.svg";
-import { ReferenceDot } from "recharts";
+import { ReferenceDot, ReferenceLine } from "recharts";
 
 
 
@@ -16,10 +16,14 @@ import {
   ReferenceArea,
 } from "recharts"
 import { useAnalytics } from "../../../context/AnalyticsContext"
+import { data } from "react-router-dom";
 
-export default function CurrentTempGraph({className=""}) {
+export default function CurrentTempGraph({ className = "" }) {
   const { state } = useAnalytics()
   const { tempHistory, tempFuture } = state
+  const temperature = state.temperature?.toFixed?.(1) ?? '--'
+
+  console.log("tempFuture,tempHistory", tempFuture, tempHistory)
   const threshold = 32
 
   const [zoomArea, setZoomArea] = useState<{ x1: number | null; x2: number | null }>({
@@ -31,6 +35,7 @@ export default function CurrentTempGraph({className=""}) {
   const [isZoomed, setIsZoomed] = useState(false)
 
   // ----- Build chart data -----
+
   const historyData = Array.isArray(tempHistory) ? tempHistory : []
   const futureTimestamps = Array.isArray(tempFuture?.timestamps)
     ? tempFuture.timestamps
@@ -47,43 +52,64 @@ export default function CurrentTempGraph({className=""}) {
       ? historyData[historyData.length - 1].temperature
       : null
 
+  const parseUTC = (utcStr: string) => {
+    const d = new Date(utcStr);
+    return Date.UTC(
+      d.getUTCFullYear(),
+      d.getUTCMonth(),
+      d.getUTCDate(),
+      d.getUTCHours(),
+      d.getUTCMinutes(),
+      d.getUTCSeconds()
+    );
+  };
+
   const fullData = [
+    // --- History Data ---
     ...historyData.map((d) => ({
-      time: new Date(d.datetime).getTime(),
+      time: parseUTC(d.datetime),
       current: d.temperature,
       upperBound: null,
       lowerBound: null,
       type: "history",
     })),
-    ...(futureTimestamps.length > 0
-      ? [
-          {
-            time: new Date(futureTimestamps[0]).getTime(),
-            current: lastTemp,
-            upperBound: null,
-            lowerBound: null,
-            type: "connector",
-          },
-        ]
-      : []),
+
+    // --- Future (Predicted) Data ---
     ...futureTimestamps.map((t, i) => ({
-      time: new Date(t).getTime(),
+      time: parseUTC(t),
       current: null,
       upperBound: upperBounds[i] ?? null,
       lowerBound: lowerBounds[i] ?? null,
       type: "future",
     })),
-  ]
+  ];
+  console.log("full Data:", fullData)
 
   const dataToRender = isZoomed ? filteredData : fullData
+  console.log("data to render:", dataToRender)
 
   // ----- Helpers -----
-  const formatXAxis = (ts: number) => {
-    const d = new Date(ts)
-    const h = d.getHours().toString().padStart(2, "0")
-    const m = d.getMinutes().toString().padStart(2, "0")
-    return `${h}:${m}`
+  const formatXAxisLocal = (ts: number) => {
+    const d = new Date(ts);
+  return d.toISOString().substring(11, 16); 
+  };
+  //x-axis lables calculation
+  const startTime = historyData.length > 0 ? parseUTC(historyData[0].datetime) : fullData[0]?.time ?? Date.now();
+  const endTime = futureTimestamps.length > 0
+      ? parseUTC(futureTimestamps[futureTimestamps.length - 1])
+      : fullData[fullData.length - 1]?.time ?? Date.now();
+  const [xDomain, setXDomain] = useState<[number, number]>([startTime, endTime]);
+
+
+  const THREE_HOURS_MS = 3 * 60 * 60 * 1000;
+  const ticks: number[] = [];
+  // align first tick to the nearest 3-hour boundary if you like, or start at startTime:
+  for (let t = startTime; t <= endTime; t += THREE_HOURS_MS) {
+    ticks.push(t);
   }
+  if (ticks[ticks.length - 1] < endTime) ticks.push(endTime);
+  
+
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -138,62 +164,85 @@ export default function CurrentTempGraph({className=""}) {
 
   // ----- Zoom logic -----
 
-const handleMouseDown = (e: any) => {
-  if (e && e.activeLabel) {
-    setIsZooming(true)
-    setZoomArea({ x1: e.activeLabel, x2: e.activeLabel })
-  }
-}
-
-const handleMouseMove = (e: any) => {
-  if (isZooming && e && e.activeLabel) {
-    setZoomArea((prev) => ({ ...prev, x2: e.activeLabel }))
-  }
-}
-
-const handleMouseUp = () => {
-  if (!isZooming) return
-  setIsZooming(false)
-
-  const { x1, x2 } = zoomArea
-  if (x1 == null || x2 == null) return
-
-  const [min, max] = x1 < x2 ? [x1, x2] : [x2, x1]
-  const zoomed = fullData.filter((d) => d.time >= min && d.time <= max)
-
-  if (zoomed.length > 2) {
-    setFilteredData(zoomed)
-    setIsZoomed(true)
-
-    // dynamically compute new Y range based on zoomed data
-    const temps = zoomed
-      .map((d) => d.current ?? d.upperBound ?? d.lowerBound)
-      .filter((v) => v != null)
-    const yMin = Math.min(...temps)
-    const yMax = Math.max(...temps)
-    setYDomain([yMin - 1, yMax + 1])
+  const handleMouseDown = (e: any) => {
+    if (e && e.activeLabel) {
+      setIsZooming(true)
+      setZoomArea({ x1: e.activeLabel, x2: e.activeLabel })
+    }
   }
 
-  setZoomArea({ x1: null, x2: null })
-}
+  const handleMouseMove = (e: any) => {
+    if (isZooming && e && e.activeLabel) {
+      setZoomArea((prev) => ({ ...prev, x2: e.activeLabel }))
+    }
+  }
 
-const handleZoomOut = () => {
-  setIsZoomed(false)
-  setFilteredData([])
-  setYDomain(defaultYDomain) // reset
-}
+  const handleMouseUp = () => {
+    if (!isZooming) return
+    setIsZooming(false)
 
-const showZoomBox =
-  isZooming && zoomArea.x1 && zoomArea.x2 && Math.abs(zoomArea.x1 - zoomArea.x2) > 0
+    const { x1, x2 } = zoomArea
+    if (x1 == null || x2 == null) return
 
+    const [min, max] = x1 < x2 ? [x1, x2] : [x2, x1]
+    const zoomed = fullData.filter((d) => d.time >= min && d.time <= max)
+
+    if (zoomed.length > 2) {
+      setFilteredData(zoomed)
+      setIsZoomed(true)
+
+      // dynamically compute new Y range based on zoomed data
+      const temps = zoomed
+        .map((d) => d.current ?? d.upperBound ?? d.lowerBound)
+        .filter((v) => v != null)
+      const yMin = Math.min(...temps)
+      const yMax = Math.max(...temps)
+      setYDomain([yMin - 1, yMax + 1])
+      setXDomain([min, max]);
+
+    }
+
+    setZoomArea({ x1: null, x2: null })
+  }
+
+  const handleZoomOut = () => {
+    setIsZoomed(false)
+    setFilteredData([])
+    setYDomain(defaultYDomain) // reset
+    setXDomain([startTime, endTime]); // reset X domain too
+
+  }
+
+  const showZoomBox =
+    isZooming && zoomArea.x1 && zoomArea.x2 && Math.abs(zoomArea.x1 - zoomArea.x2) > 0
+
+  const renderLegend = () => (
+    <div className="flex justify-center flex-wrap gap-4 text-xs text-gray-500 mt-3">
+      <span className="flex items-center gap-1">
+        <span className="w-3 h-3 bg-blue-300 rounded-sm"></span>Current
+      </span>
+      <span className="flex items-center gap-1">
+        <span className="w-3 h-3 bg-red-300 rounded-sm"></span>Red Alert
+      </span>
+      <span className="flex items-center gap-1">
+        <span className="w-3 h-3 bg-orange-300 rounded-sm"></span>Orange Alert
+      </span>
+      <span className="flex items-center gap-1">
+        <span className="w-3 h-3 bg-pink-300 rounded-sm"></span>Predicted (Backup AC On)
+      </span>
+      <span className="flex items-center gap-1">
+        <span className="w-3 h-3 bg-black rounded-sm"></span>Predicted (Backup AC Off)
+      </span>
+    </div>
+  )
 
   // ----- Render -----
   return (
-    <div 
-    className={`bg-white shadow rounded-2xl p-4 h-full flex flex-col justify-between ${className || ""}`}
+    <div
+      className={`bg-white shadow rounded-2xl p-4 h-full flex flex-col justify-between ${className || ""}`}
     >
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-sm font-medium text-gray-800">23°C Current Temperature</h2>
+        <h2 className="text-sm font-medium text-gray-800">{`${temperature}°C  Temperature`}</h2>
         <div className="flex gap-2">
           <div className="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-500 text-xs font-bold">
             !
@@ -201,87 +250,145 @@ const showZoomBox =
           <div className="w-6 h-6 bg-orange-100 rounded flex items-center justify-center text-orange-500 text-xs font-bold">
             !
           </div>
+          {isZoomed && (
+            <button
+              onClick={handleZoomOut}
+              className="self-end mb-2 text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded"
+            >
+              Zoom Out
+            </button>
+          )}
+
         </div>
       </div>
 
       <ResponsiveContainer width="100%" height={300}>
-        <AreaChart
-          data={dataToRender}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-        >
-          <defs>
-            <linearGradient id="blueFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#60a5fa" stopOpacity={0.4} />
-              <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.05} />
-            </linearGradient>
-          </defs>
+  <AreaChart
+    data={dataToRender}
+    onMouseDown={handleMouseDown}
+    onMouseMove={handleMouseMove}
+    onMouseUp={handleMouseUp}
+    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+  >
+    <defs>
+      <linearGradient id="blueFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#60a5fa" stopOpacity={0.4} />
+        <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.05} />
+      </linearGradient>
+      <linearGradient id="redFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#f87171" stopOpacity={0.5} />
+        <stop offset="100%" stopColor="#f87171" stopOpacity={0.05} />
+      </linearGradient>
+      <linearGradient id="orangeFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#fbbf24" stopOpacity={0.4} />
+        <stop offset="100%" stopColor="#fbbf24" stopOpacity={0.05} />
+      </linearGradient>
+    </defs>
 
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-          <XAxis
-            dataKey="time"
-            type="number"
-            scale="time"
-            domain={["auto", "auto"]}
-            tickFormatter={(v) => formatXAxis(v)}
-            tick={{ fontSize: 9 }}
-            ticks={dataToRender.filter((_, i) => i % 90 === 0).map((d) => d.time)}
-          />
-          <YAxis tick={{ fontSize: 10 }} domain={yDomain} />
+    <CartesianGrid stroke="#e5e7eb" strokeOpacity={0.3} vertical={false} />
 
-          <Tooltip content={<CustomTooltip />} />
+    <XAxis
+      dataKey="time"
+      type="number"
+      scale="time"
+      domain={xDomain}
+      tickFormatter={(v) => formatXAxisLocal(v)}
+      tick={{ fontSize: 9 }}
+      ticks={ticks}
+    />
+    <YAxis
+      tick={{ fontSize: 10 }}
+      domain={yDomain}
+      axisLine={{ strokeOpacity: 0.3 }}
+      tickLine={{ strokeOpacity: 0.3 }}
+    />
 
-          <Area
-            type="monotone"
-            dataKey="current"
-            stroke="#3b82f6"
-            fill="url(#blueFill)"
-            isAnimationActive={false}
-            connectNulls
-          />
-          <Line
-            type="monotone"
-            dataKey="upperBound"
-            stroke="#000"
-            dot={false}
-            strokeWidth={1.2}
-            connectNulls
-          />
-          <Line
-            type="monotone"
-            dataKey="lowerBound"
-            stroke="#ec4899"
-            dot={false}
-            strokeWidth={1.2}
-            connectNulls
-          />
+    <Tooltip content={<CustomTooltip />} />
 
-          {showZoomBox && (
-            <ReferenceArea
-              x1={Math.min(zoomArea.x1!, zoomArea.x2!)}
-              x2={Math.max(zoomArea.x1!, zoomArea.x2!)}
-              y1={yDomain[0]}
-              y2={yDomain[1]}
-              fill="#60a5fa"
-              fillOpacity={0.2}
-              stroke="#2563eb"
-              strokeOpacity={0.3}
-            />
-          )}
-          {lastTemp && (
-          <ReferenceDot
-            x={new Date(futureTimestamps[0]).getTime()}
-            y={lastTemp}
-            r={4}
-            fill="#FF5B5D"
-            stroke="white"
-          />
-        )}
-          
-        </AreaChart>
-      </ResponsiveContainer>
+    {/* Threshold Lines */}
+    <ReferenceLine y={23} stroke="#9ca3af" strokeDasharray="5 5" />
+    <ReferenceLine y={18} stroke="#9ca3af" strokeDasharray="5 5" />
+
+    {/* Red Area for History above threshold */}
+    <Area
+      type="monotone"
+      dataKey="current"
+      data={dataToRender.filter(
+        (d) => d.type === "history" && d.current > 23
+      )}
+      stroke="none"
+      fill="url(#redFill)"
+      isAnimationActive={false}
+    />
+
+    {/* Orange Area for Future above threshold */}
+    <Area
+      type="monotone"
+      dataKey="upperBound"
+      data={dataToRender.filter(
+        (d) => d.type === "future" && d.upperBound > 23
+      )}
+      stroke="none"
+      fill="url(#orangeFill)"
+      isAnimationActive={false}
+    />
+
+    {/* Normal Current Area */}
+    <Area
+      type="monotone"
+      dataKey="current"
+      stroke="#3b82f6"
+      fill="url(#blueFill)"
+      isAnimationActive={false}
+      connectNulls
+    />
+
+    {/* Prediction Lines */}
+    <Line
+      type="monotone"
+      dataKey="upperBound"
+      stroke="#000"
+      dot={false}
+      strokeWidth={1.2}
+      connectNulls
+    />
+    <Line
+      type="monotone"
+      dataKey="lowerBound"
+      stroke="#ec4899"
+      dot={false}
+      strokeWidth={1.2}
+      connectNulls
+    />
+
+    {/* Zoom Selection Area */}
+    {showZoomBox && (
+      <ReferenceArea
+        x1={Math.min(zoomArea.x1!, zoomArea.x2!)}
+        x2={Math.max(zoomArea.x1!, zoomArea.x2!)}
+        y1={yDomain[0]}
+        y2={yDomain[1]}
+        fill="#60a5fa"
+        fillOpacity={0.15}
+        stroke="#2563eb"
+        strokeOpacity={0.3}
+      />
+    )}
+
+    {/* Red Dot for Current Point */}
+    {lastTemp && (
+      <ReferenceDot
+        x={Date.parse(futureTimestamps[0])}
+        y={lastTemp}
+        r={4}
+        fill="#FF5B5D"
+        stroke="white"
+      />
+    )}
+  </AreaChart>
+</ResponsiveContainer>
+
+      {renderLegend()}
     </div>
   )
 }
