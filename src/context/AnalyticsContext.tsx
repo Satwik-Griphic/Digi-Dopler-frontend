@@ -265,6 +265,7 @@ const initialState: MetricState = {
                     : null,
                 }))
             : [];
+            console.log("fetched humidityHistory",humidityHistory)
 
       
           // --- 4️⃣ AI backend call (predicted future, UTC timestamps) ---
@@ -288,7 +289,7 @@ const initialState: MetricState = {
             timestamps.push(formatted);
           }
       
-        //   console.log("🕒 Payload timestamps (to AI backend, UTC):", timestamps);
+          console.log("🕒 Payload timestamps (to AI backend, UTC):", timestamps);
       
           const aiRes = await fetch(`${aiBaseUrl}${aiEndpoint}`, {
             method: "POST",
@@ -310,15 +311,16 @@ const initialState: MetricState = {
             let upperBound = roundTo1(aiData?.predicted_temperature_upper_bound);
             let lowerBound = roundTo1(aiData?.predicted_temperature_lower_bound);
             // predicted_humidity_upper_bound
-            let humidiyUpperBound = roundTo1(aiData?.predicted_temperature_upper_bound);
-            let humidiyLowerBound = roundTo1(aiData?.predicted_temperature_lower_bound);
+            let humidiyUpperBound = roundTo1(aiData?.predicted_humidity_upper_bound);
+            let humidiyLowerBound = roundTo1(aiData?.predicted_humidity);
             
             // ---- 🧩 NEW: Smooth transition for first 5 points ----
             
             // 1️⃣ Get last temperature from history
             const lastTemp =
                 history.length > 0 ? history[history.length - 1].temperature : 0;
-            const lastHumidity=humidityHistory> 0 ? humidityHistory[humidityHistory.length - 1].temperature : 0;
+            const lastHumidity=humidityHistory.length> 0 ? humidityHistory[humidityHistory.length - 1].humidity : 40;
+            // console.log("last fetched humidity:",humidityHistory[humidityHistory.length - 1].humidity)
             
             // 2️⃣ Helper to fill initial 5 points smoothly
             const fillInitialTransition = (data: number[], startVal: number) => {
@@ -338,6 +340,7 @@ const initialState: MetricState = {
             predicted = fillInitialTransition(predicted, lastTemp);
             upperBound = fillInitialTransition(upperBound, lastTemp);
             lowerBound = fillInitialTransition(lowerBound, lastTemp);
+            console.log("humidity upper bound and last humitidy",humidiyUpperBound,lastHumidity)
             humidiyUpperBound= fillInitialTransition(humidiyUpperBound, lastHumidity);
             humidiyLowerBound= fillInitialTransition(humidiyLowerBound, lastHumidity);
 
@@ -364,7 +367,7 @@ const initialState: MetricState = {
             };
             
             // console.log("✅ Modified future data (with smooth transition):", futureT);
-            // console.log("✅ Modified future Humidity data (with smooth transition):", futureH);
+            console.log("✅ Modified future Humidity data (with smooth transition):", futureH);
 
   
 

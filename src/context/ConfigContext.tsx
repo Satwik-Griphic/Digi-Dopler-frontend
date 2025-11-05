@@ -32,7 +32,7 @@ const DEFAULTS: AppConfig = {
   endpoints:{
     currentTempHumid: "/api/sensor-dashboard/current-reading",        
     currentSensors: "/api/sensor-dashboard/sensor-list",
-    aiBaseUrl: "http://172.26.119.12:8001",
+    aiBaseUrl: "http://172.30.205.102:8001",
     previousTemp: "/api/sensor-dashboard/temperature-record",
     previousHumidity: "/api/sensor-dashboard/humidity-record"
   }

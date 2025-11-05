@@ -21,12 +21,17 @@ import { data } from "react-router-dom";
 export default function CurrentTempGraph({ className = "" }) {
   const { state } = useAnalytics()
   const { tempHistory, tempFuture } = state
+  const {  humidityHistory,   humidityFuture } = state
+  console.log("tempHistory, tempFuture",tempHistory, tempFuture)
+  console.log("humidityFuture,humidityHistory",humidityFuture,humidityHistory)
+
+
   const temperature = state.temperature?.toFixed?.(1) ?? '--'
   const humidity = state.humidity?.toFixed?.(1) ?? '--'
 
 
   // console.log("tempFuture,tempHistory", tempFuture, tempHistory)
-  const threshold = 32
+  const threshold = 45
 
   const [zoomArea, setZoomArea] = useState<{ x1: number | null; x2: number | null }>({
     x1: null,
@@ -38,16 +43,17 @@ export default function CurrentTempGraph({ className = "" }) {
 
   // ----- Build chart data -----
 
-  const historyData = Array.isArray(tempHistory) ? tempHistory : []
-  const futureTimestamps = Array.isArray(tempFuture?.timestamps)
-    ? tempFuture.timestamps
+  const historyData = Array.isArray(humidityHistory) ? humidityHistory : []
+  const futureTimestamps = Array.isArray(humidityFuture?.timestamps)
+    ? humidityFuture.timestamps
     : []
-  const upperBounds = Array.isArray(tempFuture?.upperBound)
-    ? tempFuture.upperBound
+  const upperBounds = Array.isArray(humidityFuture?.humidiyUpperBound)
+    ? humidityFuture.humidiyUpperBound
     : []
-  const lowerBounds = Array.isArray(tempFuture?.lowerBound)
-    ? tempFuture.lowerBound
+  const lowerBounds = Array.isArray(humidityFuture?.humidiyLowerBound)
+    ? humidityFuture.humidiyLowerBound
     : []
+    console.log("historyData,upperBounds,lowerBounds,futureTimestamps",historyData,upperBounds,lowerBounds,futureTimestamps)
 
   const lastTemp =
     historyData.length > 0
@@ -70,7 +76,7 @@ export default function CurrentTempGraph({ className = "" }) {
     // --- History Data ---
     ...historyData.map((d) => ({
       time: parseUTC(d.datetime),
-      current: d.temperature,
+      current: d.humidity,
       upperBound: null,
       lowerBound: null,
       type: "history",
@@ -85,7 +91,7 @@ export default function CurrentTempGraph({ className = "" }) {
       type: "future",
     })),
   ];
-  // console.log("full Data:", fullData)
+  console.log("full Data:", fullData)
 
   const dataToRender = isZoomed ? filteredData : fullData
   // console.log("data to render:", dataToRender)
@@ -144,14 +150,14 @@ export default function CurrentTempGraph({ className = "" }) {
 
   // --- Compute dynamic Y range ---
   const allTemps = [
-    ...historyData.map((d) => d.temperature),
+    ...historyData.map((d) => d.humidity),
     ...upperBounds,
     ...lowerBounds,
   ].filter((v) => v != null);
 
   const globalMin = Math.min(...allTemps);
   const globalMax = Math.max(...allTemps);
-  const defaultYDomain: [number, number] = [globalMin - 1, globalMax + 1];
+  const defaultYDomain: [number, number] = [30,70];
 
   // state for current y-axis
   const [yDomain, setYDomain] = useState<[number, number]>(defaultYDomain);
@@ -162,7 +168,7 @@ export default function CurrentTempGraph({ className = "" }) {
       const newMax = Math.max(...allTemps);
       setYDomain([newMin - 1, newMax + 1]);
     }
-  }, [tempHistory, tempFuture]);
+  }, [humidityHistory, humidityFuture]);
 
   // ----- Zoom logic -----
 
@@ -221,7 +227,7 @@ export default function CurrentTempGraph({ className = "" }) {
   const renderLegend = () => (
     <div className="flex justify-center flex-wrap gap-4 text-xs text-gray-500 mt-3">
       <span className="flex items-center gap-1">
-        <span className="w-3 h-3 bg-blue-300 rounded-sm"></span>Current
+        <span className="w-3 h-3 bg-green-300 rounded-sm"></span>Current
       </span>
       <span className="flex items-center gap-1">
         <span className="w-3 h-3 bg-red-300 rounded-sm"></span>Red Alert
@@ -238,7 +244,16 @@ export default function CurrentTempGraph({ className = "" }) {
     </div>
   )
   
-  
+  // Filter future points where upperBound > threshold and clip to start from threshold
+const thresholdhumidity = 50;
+const futureAboveThreshold = dataToRender
+  .filter((d) => d.type === "future" && d.upperBound > thresholdhumidity)
+  .map((d) => ({
+    ...d,
+    shadedUpper: d.upperBound,
+    shadedBase: thresholdhumidity,
+  }));
+
 
   // ----- Render -----
   return (
@@ -314,22 +329,22 @@ export default function CurrentTempGraph({ className = "" }) {
     <Tooltip content={<CustomTooltip />} />
 
     {/* Threshold Lines */}
-    <ReferenceLine y={23} stroke="#9ca3af" strokeDasharray="5 5" />
-    <ReferenceLine y={18} stroke="#9ca3af" strokeDasharray="5 5" />
+    <ReferenceLine y={50} stroke="#9ca3af" strokeDasharray="5 5" />
+    <ReferenceLine y={33} stroke="#9ca3af" strokeDasharray="5 5" />
 
-    {/* Orange Area for Future above threshold */}
-    <Area
-      type="monotone"
-      data={dataToRender.filter(
-        (d) => d.type === "future" && d.upperBound > 23
-      )}
-      dataKey="upperBound"
-      stroke="none"
-      fill="#FFA05B"
-      fillOpacity={0.4}
-      baseValue={23} // fill starts from threshold, not base
-      isAnimationActive={false}
-    />
+{/* Orange Area for Future above threshold (only above 50) */}
+<Area
+  type="monotone"
+  data={futureAboveThreshold}
+  dataKey="shadedUpper"
+  stroke="none"
+  fill="#FFA05B"
+  fillOpacity={0.4}
+  baseValue={50} // dynamically start from threshold
+  isAnimationActive={false}
+/>
+
+
 
     {/* Normal Current Area */}
     <Area

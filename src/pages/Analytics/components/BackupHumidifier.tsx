@@ -7,9 +7,9 @@ const BackupHumidifier = ({className=""}) => {
     className={`bg-white shadow rounded-2xl p-4 h-full flex flex-col justify-between ${className || ""}`}
     >
       <DeviceCard
-        name="Backup Humidifier"
+        name="Backup De-humidifier"
         image="/humidifier.svg"
-        initialState={false}  // starts Off
+        initialState={true}  // starts Off
         duration="1h 02min"
       />
     </div>

@@ -137,7 +137,7 @@ export function StreamAnalyticsProvider({ children }: { children: React.ReactNod
         onClose: () => dispatch({ type: 'connection', status: 'disconnected' }),
         onError: () => dispatch({ type: 'connection', status: 'disconnected' }),
         onMessage: (msg: SocketMessage) => {
-          console.log("msg",msg)
+          // console.log("msg",msg)
           switch (msg.type) {
             case 'response':
               // console.log('response received from ai backend', msg)
