@@ -1,12 +1,12 @@
 apiBaseUrl: "http://localhost:8000"
 sockets:
-  incomingUrl: "ws://172.26.119.12:8000/v1/ws/stream"
+  incomingUrl: "ws://172.30.205.102:8000/v1/ws/stream"
   otherBackendUrl: "ws://localhost:8001/ws/forward"
 health:
   v1: "/v1/health"
   v2: "/v2/health"
 sources:
-  defaultRtsp: "rtsp://sketsstudio:Skets@12345@172.30.115.34:554/stream1"
+  defaultRtsp: "rtsp://sketsstudio:Skets@12345@172.30.115.34:554/stream2"
   cam1: null
   cam2: null
   cam3: null

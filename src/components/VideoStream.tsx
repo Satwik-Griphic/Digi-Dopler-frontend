@@ -31,7 +31,7 @@ export default function VideoStream() {
         state.boundingBoxes.forEach(box => {
           const color = box.distance > box.threshold ? 'red' : 'lime'
           ctx.strokeStyle = color
-          ctx.lineWidth = 1
+          ctx.lineWidth = 2
           ctx.strokeRect(box.x, box.y, box.w, box.h)
 
           // name label
