@@ -11,8 +11,8 @@ type ConfigState = {
 const ConfigContext = createContext<ConfigState | undefined>(undefined)
 
 const DEFAULTS: AppConfig = {
-  apiBaseUrl: 'http://172.26.119.12:8000',
-  sockets: { incomingUrl: 'ws://172.26.119.12:8000/v2/ws/stream' },
+  apiBaseUrl: 'http://172.30.205.102:8000',
+  sockets: { incomingUrl: 'ws://172.30.205.102:8000/v2/ws/stream' },
   health: { v1: '/v1/health', v2: '/v2/health' },
   sources: { defaultRtsp: '', cam1: null, cam2: null },
   ui: { modelVersion: 'v2' },
@@ -32,7 +32,7 @@ const DEFAULTS: AppConfig = {
   endpoints:{
     currentTempHumid: "/api/sensor-dashboard/current-reading",        
     currentSensors: "/api/sensor-dashboard/sensor-list",
-    aiBaseUrl: "http://172.26.119.12:8001",
+    aiBaseUrl: "http://172.30.205.102:8001",
     previousTemp: "/api/sensor-dashboard/temperature-record",
     previousHumidity: "/api/sensor-dashboard/humidity-record"
   }
